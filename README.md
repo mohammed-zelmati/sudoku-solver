@@ -8,21 +8,21 @@
 L'algorithme de backtracking est plus performant pour résoudre des grilles de Sudoku, particulièrement celles avec un niveau de difficulté élevé.
 
 ## Voici un tableau pour comparer les deux algorithmes :
-### |------------|----------------------|---------------------|---------------|
-### |algorithme  | Complexité toporelle | Complexité spaciale | Observations  |
-### |------------|----------------------|---------------------|---------------|
-### |Force brute | $$O(9^{81})$$        | Faible              |Inefficace pour|
-### |            |                      |                     |des grilles    |
-### |            |                      |                     |complexes      |
-### |------------|----------------------|---------------------|---------------|
-### |Backtracking| $$O(9^m)$$, m < 81   | Faible              |Plus rapide et |
-### |            |                      |                     | efficace      |
-### |------------|----------------------|---------------------|---------------|
+### |------------|----------------------|---------------------|---------------|\n
+### |algorithme  | Complexité toporelle | Complexité spaciale | Observations  |\n
+### |------------|----------------------|---------------------|---------------|\n
+### |Force brute | $$O(9^{81})$$        | Faible              |Inefficace pour|\n
+### |            |                      |                     |des grilles    |\n
+### |            |                      |                     |complexes      |\n
+### |------------|----------------------|---------------------|---------------|\n
+### |Backtracking| $$O(9^m)$$, m < 81   | Faible              |Plus rapide et |\n
+### |            |                      |                     | efficace      |\n
+### |------------|----------------------|---------------------|---------------|\n
 
 ### Calcul du temps de méthode de la Force brute:
 
 Nombre total de combinaisons : Une grille de Sudoku 9x9 possède 81 cases. Si toutes les cases sont vides, on a potentiellement (9^81) combinaisons possibles à explorer. Cela correspond à environ (1.96 * 10^77) combinaisons, cela donne :
-#### 1.96 * 10^77 =19600000000000000000000000000000000000000000000000000000000000000000000000000000000
+### 1.96 * 10^77 = 19600000000000000000000000000000000000000000000000000000000000000000000000000000000
  Ce chiffre est très, très grand, illustrant à quel point l'approche par Force brute pour résoudre une grille de Sudoku devient impraticable à cause du nombre de combinaisons possibles. 
 
 Supposons qu'un ordinateur peut tester 1 milliard (soit (10^9)) de combinaisons par seconde. C'est une hypothèse optimiste pour montrer l'ampleur du problème.
