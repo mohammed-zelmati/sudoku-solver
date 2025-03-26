@@ -92,3 +92,45 @@
 # ajoutées par l’algorithme.
 # Fiers de votre outil, vous faites un second affichage, plus esthétique de votre
 # outil, à l'aide de la librairie Pygame.
+
+# ________________________________________________________________________________
+# Le projet consiste à développer un résolveur de Sudoku en Python en utilisant deux approches algorithmiques : 
+# 1)	Force brute : tester toutes les combinaisons possibles.
+# 2)	Backtracking : Essayer les chiffres un par un et revenir en arrière si un conflit est délecté.
+# L’objectif est de comparer ces méthodes en termes de performance et d’efficacité.
+# L’approche orientée objet est recommandée, donc on peut organiser le code ainsi/
+# Classe Sudoko
+# -Lecture et stockage de la grille depuis un fichier.
+# -Affichage de la grille (brute et formatée).
+# -Implémentation des méthodes de résolution (force brute et bracktracking).
+# -Comparaison des performances.
+# Script principal (main.py)
+# -Charger un exemple de grille
+# -Appliquer une méthode de résolution
+# -Afficher la solution dans le terminal et avec Pygame
+# ** Implémentation des méthodes :
+# 1-	Lecture et affichage de la grille
+# -Lire un fichier texte contenant la grille
+# -Stocker la grille dans une liste de listes (9x9)
+# -Afficher la grille de manière lisible
+#         2- Méthode Force brute :
+# 	-Générer toutes les combinaisons possibles
+# 	-Vérifier si une grille est valide
+# 	- Complexité : Très élevée (factoriel ou exponentiel)
+#        3- Méthode Backtracking (Récursif):
+# 	-Essayer un chiffre de 1 à 9 dans case vide
+ 
+
+# Dans le terminal :
+# -	Afficher la grille avec les valeurs initiales et les nouvelles valeurs.
+# Avec Pygame :
+# -	Créer une interface graphique pour visualiser la grille et la solution.
+# Comparaison des performances/
+# -	Temps d’exécution : Utiliser ‘time’ pour mesurer le temps de chaque méthode.
+# -	Complexité algorithmique : Analyser la différence entre force brute et backtracking
+# Finalisation du projet :
+# -	Dépôt GitHub :
+# o	Implémentation de la classe sur le fichier : sudoku_solver.py
+# o	Script principal : main.py
+# o	Explication des méthodes et comparaison : READEME.md
+# o	Présentation slides pour expliquer le projet
