@@ -8,16 +8,13 @@
 L'algorithme de backtracking est plus performant pour résoudre des grilles de Sudoku, particulièrement celles avec un niveau de difficulté élevé.
 
 ## Voici un tableau pour comparer les deux algorithmes :
-### |------------|----------------------|---------------------|---------------|\n
-### |algorithme  | Complexité toporelle | Complexité spaciale | Observations  |\n
-### |------------|----------------------|---------------------|---------------|\n
-### |Force brute | $$O(9^{81})$$        | Faible              |Inefficace pour|\n
-### |            |                      |                     |des grilles    |\n
-### |            |                      |                     |complexes      |\n
-### |------------|----------------------|---------------------|---------------|\n
-### |Backtracking| $$O(9^m)$$, m < 81   | Faible              |Plus rapide et |\n
-### |            |                      |                     | efficace      |\n
-### |------------|----------------------|---------------------|---------------|\n
+
+| Algorithme  | Complexité temporelle   | Complexité spatiale | Observations              |
+|-------------|-------------------------|---------------------|---------------------------|
+| Force brute | O(9^81)                 | Faible              | Inefficace pour des       |
+|             |                         |                     | grilles complexes         |
+|-------------|-------------------------|---------------------|---------------------------|
+| Backtracking| O(9^m), m < 81          | Faible              | Plus rapide et efficace   |
 
 ### Calcul du temps de méthode de la Force brute:
 
