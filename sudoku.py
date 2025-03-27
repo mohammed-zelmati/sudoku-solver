@@ -1,151 +1,128 @@
 import pygame
-import mysql.connector
-import time
+import random
+import time  # Pour mesurer le temps
+from typing import List, Optional, Tuple
 
 class Sudoku:
-    def __init__(self, screen, grid):
-        self.grid = grid
-        self.size = 9
+    def __init__(self, screen: pygame.Surface, initial_grid: Optional[List[List[int]]] = None):
+        self.original_grid = initial_grid or [[0]*9 for _ in range(9)]
+        self.grid = [row.copy() for row in self.original_grid]
         self.screen = screen
+        self.messages: List[str] = []
+        self.selected_cell: Optional[Tuple[int, int]] = None
 
-        try:
-            self.db = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="357321zM@.",
-                database="sudoku"
-            )
-            self.cursor = self.db.cursor()
-        except mysql.connector.Error as err:
-            self.afficher_erreur(f"Connexion à la base de données échouée : {err}")
-            pygame.quit()
-            raise SystemExit
+    def show_message(self, message: str) -> None:
+        self.messages.append(message)
 
-    def afficher_erreur(self, message):
-        largeur, hauteur = 400, 200
-        couleur_fond = (255, 200, 200)
-        couleur_bordure = (150, 0, 0)
-        couleur_texte = (0, 0, 0)
-        police_taille = 24
+    def draw_messages(self) -> None:
+        font = pygame.font.SysFont("Arial", 20)
+        y = 470
+        for msg in self.messages[-5:]:
+            text = font.render(msg, True, (255, 0, 0))
+            self.screen.blit(text, (10, y))
+            y += 25
 
-        screen_rect = self.screen.get_rect()
-        boite_rect = pygame.Rect(
-            (screen_rect.centerx - largeur // 2, screen_rect.centery - hauteur // 2),
-            (largeur, hauteur)
+    def reset_grid(self) -> None:
+        # self.grid = [row.copy() for row in self.original_grid]
+        # Réinitialise toutes les cases de la grille à zéro (cases vides)
+        self.grid = [[0] * 9 for _ in range(9)]
+        self.messages = []  # Efface tous les messages
+
+    def generate_grid(self, difficulty: str) -> None:
+        self.original_grid = self.create_sudoku_grid()
+        self.grid = [row.copy() for row in self.original_grid]
+        difficulty_levels = {"facile": 40, "moyen": 50, "difficile": 60, "très_difficile": 70, "expert": 80}
+        self.remove_numbers(difficulty_levels.get(difficulty, 40))
+
+    def create_sudoku_grid(self) -> List[List[int]]:
+        grid = [[0] * 9 for _ in range(9)]
+        self.solve_backtracking(grid)
+        return grid
+
+    def solve_backtracking(self, grid: List[List[int]]) -> bool:
+        empty = self.find_empty(grid)
+        if not empty:
+            return True
+        row, col = empty
+        for num in random.sample(range(1, 10), 9):  # Mélange pour plus de variété
+            if self.is_valid(grid, row, col, num):
+                grid[row][col] = num
+                if self.solve_backtracking(grid):
+                    return True
+                grid[row][col] = 0
+        return False
+
+    def find_empty(self, grid: List[List[int]]) -> Optional[Tuple[int, int]]:
+        for i in range(9):
+            for j in range(9):
+                if grid[i][j] == 0:
+                    return (i, j)
+        return None
+
+    def is_valid(self, grid: List[List[int]], row: int, col: int, num: int) -> bool:
+        return (
+            self.valid_row(grid, row, num) and
+            self.valid_col(grid, col, num) and
+            self.valid_square(grid, row - row % 3, col - col % 3, num)
         )
 
-        pygame.draw.rect(self.screen, couleur_bordure, boite_rect, 5)
-        pygame.draw.rect(self.screen, couleur_fond, boite_rect)
+    def valid_row(self, grid: List[List[int]], row: int, num: int) -> bool:
+        return num not in grid[row]
 
-        font = pygame.font.Font(None, police_taille)
-        texte = font.render(message, True, couleur_texte)
-        texte_rect = texte.get_rect(center=boite_rect.center)
-        self.screen.blit(texte, texte_rect)
+    def valid_col(self, grid: List[List[int]], col: int, num: int) -> bool:
+        return all(row[col] != num for row in grid)
 
-        pygame.display.flip()
-        pygame.time.wait(3000)
-
-    def to_pygame(self):
-        self.screen.fill((255, 255, 255))
-        font = pygame.font.SysFont("Arial", 40)
-        black = (0, 0, 0)
-        grey = (200, 200, 200)
-
-        for row in range(self.size):
-            for col in range(self.size):
-                x = col * 50
-                y = row * 50
-                pygame.draw.rect(self.screen, black, (x, y, 50, 50), 2)
-                if self.grid[row][col] != 0:
-                    text = font.render(str(self.grid[row][col]), True, black)
-                    self.screen.blit(text, (x + 15, y + 10))
-
-        for i in range(1, self.size):
-            if i % 3 == 0:
-                pygame.draw.line(self.screen, black, (i * 50, 0), (i * 50, 450), 5)
-                pygame.draw.line(self.screen, black, (0, i * 50), (450, i * 50), 5)
-            else:
-                pygame.draw.line(self.screen, grey, (i * 50, 0), (i * 50, 450), 1)
-                pygame.draw.line(self.screen, grey, (0, i * 50), (450, i * 50), 1)
-
-        pygame.display.update()
-
-    def load_grid_from_db(self, grid_id):
-        try:
-            query = "SELECT grid FROM grilles WHERE id = %s"
-            self.cursor.execute(query, (grid_id,))
-            result = self.cursor.fetchone()
-
-            if result:
-                self.grid = [
-                    [int(cell) if cell.isdigit() else 0 for cell in row]
-                    for row in result[0].split("\n")
-                ]
-            else:
-                print(f"Aucune grille trouvée avec l'ID {grid_id}.")
-                self.grid = None
-        except mysql.connector.Error as err:
-            self.afficher_erreur(f"Erreur lors du chargement de la grille : {err}")
-
-    def solve_brute_force(self):
-        start_time = time.time()
-        if self._solve_brute_force():
-            print("Grille résolue avec succès par force brute !")
-        else:
-            print("Impossible de résoudre la grille par force brute.")
-        
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        print(f"Temps nécessaire (force brute) : {elapsed_time:.6f} secondes")
-        return self.grid
-
-    def _solve_brute_force(self):
-        for row in range(self.size):
-            for col in range(self.size):
-                if self.grid[row][col] == 0:
-                    for num in range(1, self.size + 1):
-                        if self.is_valid(row, col, num):
-                            self.grid[row][col] = num
-                            if self._solve_brute_force():
-                                return True
-                            self.grid[row][col] = 0
-                    return False
-        return True
-
-    def solve_backtracking(self):
-        start_time = time.time()
-        success = self._solve_backtracking()
-        
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        print(f"Temps nécessaire (backtracking) : {elapsed_time:.6f} secondes")
-        return success
-
-    def _solve_backtracking(self):
-        for row in range(self.size):
-            for col in range(self.size):
-                if self.grid[row][col] == 0:
-                    for num in range(1, self.size + 1):
-                        if self.is_valid(row, col, num):
-                            self.grid[row][col] = num
-                            if self._solve_backtracking():
-                                return True
-                            self.grid[row][col] = 0
-                    return False
-        return True
-
-    def is_valid(self, row, col, num):
-        for i in range(self.size):
-            if self.grid[row][i] == num or self.grid[i][col] == num:
-                return False
-
-        start_row, start_col = 3 * (row // 3), 3 * (col // 3)
+    def valid_square(self, grid: List[List[int]], start_row: int, start_col: int, num: int) -> bool:
         for i in range(3):
             for j in range(3):
-                if self.grid[start_row + i][start_col + j] == num:
+                if grid[start_row + i][start_col + j] == num:
                     return False
         return True
 
-    def print_grid(self):
-        for row in self.grid:
-            print(" ".join(str(cell) if cell != 0 else '_' for cell in row))
+    def remove_numbers(self, count: int) -> None:
+        attempts = 0
+        while attempts < count:
+            row, col = random.randint(0, 8), random.randint(0, 8)
+            if self.grid[row][col] != 0:
+                self.grid[row][col] = 0
+                attempts += 1
+
+    def handle_click(self, pos: Tuple[int, int]) -> None:
+        x, y = pos
+        if 0 <= x < 450 and 0 <= y < 450:
+            self.selected_cell = (y // 50, x // 50)
+
+    def handle_key(self, key: int) -> None:
+        if not self.selected_cell:
+            return
+        row, col = self.selected_cell
+        if self.original_grid[row][col] != 0:
+            return
+        if pygame.K_1 <= key <= pygame.K_9:
+            num = key - pygame.K_0
+            if self.is_valid(self.grid, row, col, num):
+                self.grid[row][col] = num
+            else:
+                self.show_message("Mouvement invalide !")
+        elif key in (pygame.K_DELETE, pygame.K_BACKSPACE):
+            self.grid[row][col] = 0
+
+    def draw_grid(self) -> None:
+        self.screen.fill((255, 255, 255))
+        for i in range(9):
+            for j in range(9):
+                rect = pygame.Rect(j*50, i*50, 50, 50)
+                pygame.draw.rect(self.screen, (200, 200, 200), rect, 1)
+                if self.grid[i][j] != 0:
+                    color = (0, 0, 255) if self.original_grid[i][j] == 0 else (0, 0, 0)
+                    font = pygame.font.SysFont("Arial", 36)
+                    text = font.render(str(self.grid[i][j]), True, color)
+                    self.screen.blit(text, (j*50 + 15, i*50 + 5))
+
+        for i in range(0, 10, 3):
+            pygame.draw.line(self.screen, (0, 0, 0), (i*50, 0), (i*50, 450), 3)
+            pygame.draw.line(self.screen, (0, 0, 0), (0, i*50), (450, i*50), 3)
+
+        if self.selected_cell:
+            row, col = self.selected_cell
+            pygame.draw.rect(self.screen, (255, 100, 100), (col*50, row*50, 50, 50), 3)
