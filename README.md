@@ -9,12 +9,12 @@ L'algorithme de backtracking est plus performant pour résoudre des grilles de S
 
 ## Voici un tableau pour comparer les deux algorithmes :
 
-| Algorithme  | Complexité temporelle   | Complexité spatiale | Observations              |
+| Algorithme  | Complexité temporelle   | Rapidité            | Efficacité                |
 |-------------|-------------------------|---------------------|---------------------------|
-| Force brute | O(9^81)                 | Faible              | Inefficace pour des       |
+| Force brute | O(9^81)                 | Très lente          | Inefficace pour des       |
 |             |                         |                     | grilles complexes         |
 |-------------|-------------------------|---------------------|---------------------------|
-| Backtracking| O(9^m), m < 81          | Faible              | Plus rapide et efficace   |
+| Backtracking| O(9^m), m < 81          | Rapide              | Plus rapide et efficace   |
 
 ### Calcul du temps de méthode de la Force brute:
 
