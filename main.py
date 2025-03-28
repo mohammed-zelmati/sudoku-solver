@@ -1,7 +1,6 @@
 import pygame
-import random
 import time  # Pour mesurer le temps
-from typing import List, Optional, Tuple
+from typing import Tuple
 from sudoku import Sudoku
 
 class SudokuUI:
