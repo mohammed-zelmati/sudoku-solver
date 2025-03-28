@@ -11,6 +11,76 @@ class Sudoku:
         self.messages: List[str] = []
         self.selected_cell: Optional[Tuple[int, int]] = None
 
+    def solve_backtracking(self, grid: List[List[int]], visualize: bool = False) -> bool:
+        """
+        Résout la grille de Sudoku par backtracking non optimisé
+        Args:
+            grid: Grille 9x9 à résoudre
+            visualize: Si True, montre les étapes de résolution
+        Returns:
+            bool: True si une solution est trouvée, False sinon
+        """
+        # Trouver une case vide
+        empty = self.find_empty(grid)
+        if not empty:
+            return True  # Plus de case vide = grille résolue
+        
+        row, col = empty
+        
+        # Essayer chaque nombre de 1 à 9
+        for num in range(1, 10):
+            # Vérifier si le nombre peut être placé
+            if self.is_valid(grid, row, col, num):
+                # Placer le nombre
+                grid[row][col] = num
+                
+                # Visualisation optionnelle
+                if visualize:
+                    self.draw_grid()
+                    pygame.display.flip()
+                    pygame.time.wait(50)  # Pause pour voir l'évolution
+                    
+                # Continuer récursivement
+                if self.solve_backtracking(grid, visualize):
+                    return True
+                    
+                # Si échec, retirer le nombre (backtrack)
+                grid[row][col] = 0
+                
+        return False  # Aucune solution trouvée
+
+    def find_empty(self, grid: List[List[int]]) -> Optional[Tuple[int, int]]:
+        """Trouve la première case vide dans la grille"""
+        for i in range(9):
+            for j in range(9):
+                if grid[i][j] == 0:
+                    return (i, j)
+        return None
+
+    def is_valid(self, grid: List[List[int]], row: int, col: int, num: int) -> bool:
+        """Vérifie si placer 'num' à la position (row, col) est valide"""
+        return (
+            self.valid_row(grid, row, num) and
+            self.valid_col(grid, col, num) and
+            self.valid_square(grid, row - row % 3, col - col % 3, num)
+        )
+
+    def valid_row(self, grid: List[List[int]], row: int, num: int) -> bool:
+        """Vérifie si 'num' n'est pas déjà dans la ligne"""
+        return num not in grid[row]
+
+    def valid_col(self, grid: List[List[int]], col: int, num: int) -> bool:
+        """Vérifie si 'num' n'est pas déjà dans la colonne"""
+        return all(row[col] != num for row in grid)
+
+    def valid_square(self, grid: List[List[int]], start_row: int, start_col: int, num: int) -> bool:
+        """Vérifie si 'num' n'est pas déjà dans le carré 3x3"""
+        for i in range(3):
+            for j in range(3):
+                if grid[start_row + i][start_col + j] == num:
+                    return False
+        return True
+    
     def show_message(self, message: str) -> None:
         self.messages.append(message)
 
@@ -23,10 +93,8 @@ class Sudoku:
             y += 25
 
     def reset_grid(self) -> None:
-        # self.grid = [row.copy() for row in self.original_grid]
-        # Réinitialise toutes les cases de la grille à zéro (cases vides)
         self.grid = [[0] * 9 for _ in range(9)]
-        self.messages = []  # Efface tous les messages
+        self.messages = []
 
     def generate_grid(self, difficulty: str) -> None:
         self.original_grid = self.create_sudoku_grid()
@@ -38,47 +106,7 @@ class Sudoku:
         grid = [[0] * 9 for _ in range(9)]
         self.solve_backtracking(grid)
         return grid
-
-    def solve_backtracking(self, grid: List[List[int]]) -> bool:
-        empty = self.find_empty(grid)
-        if not empty:
-            return True
-        row, col = empty
-        for num in random.sample(range(1, 10), 9):  # Mélange pour plus de variété
-            if self.is_valid(grid, row, col, num):
-                grid[row][col] = num
-                if self.solve_backtracking(grid):
-                    return True
-                grid[row][col] = 0
-        return False
-
-    def find_empty(self, grid: List[List[int]]) -> Optional[Tuple[int, int]]:
-        for i in range(9):
-            for j in range(9):
-                if grid[i][j] == 0:
-                    return (i, j)
-        return None
-
-    def is_valid(self, grid: List[List[int]], row: int, col: int, num: int) -> bool:
-        return (
-            self.valid_row(grid, row, num) and
-            self.valid_col(grid, col, num) and
-            self.valid_square(grid, row - row % 3, col - col % 3, num)
-        )
-
-    def valid_row(self, grid: List[List[int]], row: int, num: int) -> bool:
-        return num not in grid[row]
-
-    def valid_col(self, grid: List[List[int]], col: int, num: int) -> bool:
-        return all(row[col] != num for row in grid)
-
-    def valid_square(self, grid: List[List[int]], start_row: int, start_col: int, num: int) -> bool:
-        for i in range(3):
-            for j in range(3):
-                if grid[start_row + i][start_col + j] == num:
-                    return False
-        return True
-
+    
     def remove_numbers(self, count: int) -> None:
         attempts = 0
         while attempts < count:

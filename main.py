@@ -24,6 +24,34 @@ class SudokuUI:
         }
         self.show_menu = False
 
+    def handle_mouse(self, pos: Tuple[int, int]) -> None:
+        if pos[0] < 450 and pos[1] < 450:
+            self.sudoku.handle_click(pos)
+            self.show_menu = False
+            return
+        if self.buttons["menu"].collidepoint(pos):
+            self.show_menu = not self.show_menu
+        elif self.buttons["solve"].collidepoint(pos) and not self.show_menu:
+            start_time = time.time()
+            # Utilisation de la visualisation dans la résolution
+            if self.sudoku.solve_backtracking(self.sudoku.grid, visualize=True):
+                end_time = time.time()
+                elapsed_time = end_time - start_time
+                self.sudoku.show_message(f"Solution trouvée en {elapsed_time:.3f} secondes")
+            else:
+                self.sudoku.show_message("Aucune solution !")
+        elif self.buttons["reset"].collidepoint(pos) and not self.show_menu:
+            self.sudoku.reset_grid()
+            self.sudoku.show_message("Grille réinitialisée")
+
+        if self.show_menu:
+            for level, rect in self.menu_buttons.items():
+                if rect.collidepoint(pos):
+                    self.sudoku.generate_grid(level)
+                    self.sudoku.show_message(f"Grille {level} générée!")
+                    self.show_menu = False
+                    break
+    
     def draw_button(self, rect: pygame.Rect, text: str, color: Tuple[int, int, int], hover: bool = False) -> None:
         pygame.draw.rect(self.screen, (255, 200, 200) if hover else color, rect)
         pygame.draw.rect(self.screen, (0, 0, 0), rect, 2)
@@ -49,34 +77,7 @@ class SudokuUI:
             self.sudoku.draw_grid()
             self.draw_interface(mouse_pos)
             pygame.display.flip()
-
-    def handle_mouse(self, pos: Tuple[int, int]) -> None:
-        if pos[0] < 450 and pos[1] < 450:
-            self.sudoku.handle_click(pos)
-            self.show_menu = False
-            return
-        if self.buttons["menu"].collidepoint(pos):
-            self.show_menu = not self.show_menu
-        elif self.buttons["solve"].collidepoint(pos) and not self.show_menu:
-            start_time = time.time()  # Début de la mesure du temps
-            if self.sudoku.solve_backtracking(self.sudoku.grid):
-                end_time = time.time()  # Fin de la mesure du temps
-                elapsed_time = end_time - start_time
-                self.sudoku.show_message(f"Solution trouvée en {elapsed_time:.3f} secondes")
-            else:
-                self.sudoku.show_message("Aucune solution !")
-        elif self.buttons["reset"].collidepoint(pos) and not self.show_menu:
-            self.sudoku.reset_grid()
-            self.sudoku.show_message("Grille réinitialisée")
-
-        if self.show_menu:
-            for level, rect in self.menu_buttons.items():
-                if rect.collidepoint(pos):
-                    self.sudoku.generate_grid(level)
-                    self.sudoku.show_message(f"Grille {level} générée!")
-                    self.show_menu = False
-                    break
-
+    
     def draw_interface(self, mouse_pos: Tuple[int, int]) -> None:
         for key, rect in self.buttons.items():
             hover = rect.collidepoint(mouse_pos) and (key != "menu" or not self.show_menu)
